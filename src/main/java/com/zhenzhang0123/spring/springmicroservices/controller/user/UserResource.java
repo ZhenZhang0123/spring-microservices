@@ -3,6 +3,7 @@ package com.zhenzhang0123.spring.springmicroservices.controller.user;
 import java.net.URI;
 import java.util.List;
 
+import com.zhenzhang0123.spring.springmicroservices.common.UserNotFoundException;
 import com.zhenzhang0123.spring.springmicroservices.entity.User;
 import com.zhenzhang0123.spring.springmicroservices.service.UserDaoService;
 import org.springframework.http.ResponseEntity;
@@ -22,21 +23,24 @@ public class UserResource {
         this.service = service;
     }
 
-    // GET /users
     @GetMapping("/users")
     public List<User> retrieveAllUsers() {
         return service.findAll();
     }
 
-    // GET /users
     @GetMapping("/users/{id}")
     public User retrieveUser(@PathVariable int id) {
-        return service.findOne(id);
+        User user = service.findOne(id);
+
+        if (user == null)
+            throw new UserNotFoundException("id:" + id);
+
+        return user;
     }
 
-    //POST /users
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@RequestBody User user) {
+
         User savedUser = service.save(user);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
